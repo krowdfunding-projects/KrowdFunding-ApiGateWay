@@ -1,0 +1,43 @@
+server:
+  port: 8081
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8888/eureka
+
+spring:
+  application:
+    name: krowdfunding-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: orderService
+          uri: lb://orderService
+          predicates:
+            - Path=/order/**
+            - Method=GET,POST,PUT,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/order/(?<segment>.*), /$\{segment}
+# TODO after UserService ... add Authentication, Authorization
+        - id: productService
+          uri: lb://productService
+          predicates:
+            - Path=/product/**
+            - Method=GET,POST,PUT,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/product/(?<segment>.*), /$\{segment}
+
+        - id: userService
+          uri: lb://userService
+          predicates:
+            - Path=/user/**
+            - Method= GET,POST,PUT,DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user/(?<segment>.*), /$\{segment}
+
