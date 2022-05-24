@@ -30,7 +30,12 @@ spring:
             - Method=GET,POST,PUT,DELETE
           filters:
             - RemoveRequestHeader=Cookie
+            - name: CircuitBreaker
+              args:
+                name: productCircuit
+                fallbackUri: forward:/product-fallback
             - RewritePath=/product/(?<segment>.*), /$\{segment}
+
 
         - id: userService
           uri: lb://userService
@@ -40,4 +45,11 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user/(?<segment>.*), /$\{segment}
+
+      default-filters:
+        - name : GlobalFilter
+          args:
+            baseMessage : krowdFunding default Global Filter
+            preLogger: true
+            postLogger: true
 
