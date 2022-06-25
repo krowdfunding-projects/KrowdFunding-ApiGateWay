@@ -26,11 +26,16 @@ spring:
         - id: productService
           uri: lb://productService
           predicates:
-            - Path=/product/**
+            - Path=/merchant/** # 상품 도메인과 이름이 겹쳐서 merchant로 변경
             - Method=GET,POST,PUT,DELETE
           filters:
             - RemoveRequestHeader=Cookie
-            - RewritePath=/product/(?<segment>.*), /$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: productCircuit
+                fallbackUri: forward:/product-fallback
+            - RewritePath=/merchant/(?<segment>.*), /$\{segment}
+
 
         - id: userService
           uri: lb://userService
@@ -40,4 +45,11 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user/(?<segment>.*), /$\{segment}
+
+      default-filters:
+        - name : GlobalFilter
+          args:
+            baseMessage : krowdFunding default Global Filter
+            preLogger: true
+            postLogger: true
 
